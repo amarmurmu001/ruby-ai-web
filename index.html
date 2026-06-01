@@ -45,7 +45,6 @@
       #sidebar-overlay { display: none !important; }
       .chat-scroll { width: 100%; max-width: 48rem; margin-left: auto; margin-right: auto; }
       .msg-user, .msg-ruby { max-width: 85%; }
-      .msg-user { margin-left: auto !important; }
     }
     @media (min-width: 1024px) {
       .chat-scroll { max-width: 56rem; }
@@ -57,7 +56,6 @@
     }
     @media (max-width: 480px) {
       #messages { padding-left: 8px !important; padding-right: 8px !important; }
-      .msg-user, .msg-ruby { margin-left: 2px !important; margin-right: 2px !important; }
       .msg-content { font-size: 13px !important; }
       .msg-content pre { font-size: 11px !important; padding: 8px !important; }
     }
@@ -206,7 +204,7 @@
       document.getElementById('messages').innerHTML = STATE.history.map(msg => {
         if (msg.role === 'system') return '<div class="msg-system">'+escapeHtml(msg.content)+'</div>';
         const isUser = msg.role === 'user';
-        const sides = isUser ? 'ml-6 md:ml-0' : 'mr-6 md:mr-0';
+        const sides = isUser ? 'ml-auto mr-0' : 'mr-auto ml-0';
         return '<div class="chat-scroll slide-up '+(isUser?'msg-user ':'msg-ruby ')+sides+' px-2.5 md:px-4 py-2 md:py-2.5"><div class="text-[9px] md:text-[10px] font-semibold '+(isUser?'text-ruby-sec':'text-ruby-accent')+' mb-1 md:mb-1.5 tracking-wide">'+(isUser?'[AMAR]':'[RUBY]')+'</div><div class="msg-content text-xs md:text-sm leading-relaxed text-ruby-accent/90">'+renderContent(msg.content)+'</div></div>';
       }).join('');
       scrollToBottom();
@@ -254,7 +252,7 @@
       renderMessages(); updateConvTitle(text);
 
       const el = document.getElementById('messages');
-      el.innerHTML += '<div id="typing" class="chat-scroll msg-ruby mr-6 md:mr-0 px-2.5 md:px-4 py-2 md:py-3 slide-up"><div class="text-[9px] md:text-[10px] font-semibold text-ruby-accent mb-1 md:mb-2 tracking-wide">[RUBY]</div><div class="flex gap-1.5 items-center pl-0.5"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
+      el.innerHTML += '<div id="typing" class="chat-scroll msg-ruby mr-auto ml-0 px-2.5 md:px-4 py-2 md:py-3 slide-up"><div class="text-[9px] md:text-[10px] font-semibold text-ruby-accent mb-1 md:mb-2 tracking-wide">[RUBY]</div><div class="flex gap-1.5 items-center pl-0.5"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
       scrollToBottom();
 
       try {
