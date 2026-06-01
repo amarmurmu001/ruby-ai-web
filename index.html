@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Ruby AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ruby: { bg: '#0a0a0a', surface: '#111111', panel: '#1a1a1a', accent: '#e0e0e0', dim: '#555555', sec: '#888888', border: '#222222', green: '#00d466', red: '#ff3b30' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html, body { height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0a; color: #e0e0e0; overscroll-behavior: none; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    #messages::-webkit-scrollbar { width: 3px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+    .msg-user { background: #1a1a1a; border: 1px solid #222; border-radius: 14px 14px 4px 14px; }
+    .msg-ruby { background: #111; border: 1px solid #222; border-radius: 14px 14px 14px 4px; }
+    .msg-system { color: #555; font-size: 11px; text-align: center; padding: 6px 0; }
+    .msg-content code { background: #1a1a1a; color: #ff9f0a; padding: 1px 5px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; word-break: break-word; }
+    .msg-content pre { background: #0d0d0d; border: 1px solid #222; border-radius: 8px; padding: 12px; margin: 8px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #888; }
+    .msg-content a { color: #e0e0e0; text-decoration: underline; text-underline-offset: 2px; word-break: break-all; }
+    .typing-dot { display: inline-block; width: 7px; height: 7px; background: #666; border-radius: 50%; animation: pulse 1.4s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,60%,100% { opacity: 0.3; transform: scale(0.8); } 30% { opacity: 1; transform: scale(1); } }
+    #input:focus { outline: none; }
+    #sidebar { transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+    #sidebar.open { transform: translateX(0); }
+    .slide-up { animation: slideUp 0.2s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (min-width: 768px) {
+      #sidebar { transform: translateX(0) !important; position: relative !important; width: 260px !important; }
+      #sidebar-overlay { display: none !important; }
+    }
+    @media (max-width: 400px) {
+      .msg-user, .msg-ruby { margin-left: 4px !important; margin-right: 4px !important; }
+      #messages { padding-left: 10px !important; padding-right: 10px !important; }
+    }
+  </style>
+</head>
+<body class="flex flex-col bg-ruby-bg" style="height:100dvh">
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-30 w-72 bg-ruby-surface border-r border-ruby-border transform -translate-x-full md:translate-x-0 flex flex-col" style="padding-bottom:env(safe-area-inset-bottom)">
+    <div class="flex items-center justify-between p-4 border-b border-ruby-border shrink-0">
+      <h1 class="text-sm font-semibold text-ruby-accent tracking-wide">[ ruby ]</h1>
+      <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-xl leading-none p-1">&times;</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-3 space-y-1" id="conv-list"></div>
+    <div class="p-3 border-t border-ruby-border shrink-0">
+      <button onclick="newConversation()" class="w-full text-xs text-ruby-dim py-2.5 px-3 border border-ruby-border rounded-lg hover:text-ruby-accent hover:border-ruby-sec transition text-left font-medium">+ New chat</button>
+    </div>
+  </aside>
+
+  <div class="flex-1 flex flex-col min-h-0 md:ml-72">
+    <header class="flex items-center justify-between px-3 md:px-4 py-3 border-b border-ruby-border bg-ruby-surface shrink-0">
+      <div class="flex items-center gap-2 min-w-0">
+        <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-xl leading-none p-1 -ml-1">&#9776;</button>
+        <span class="text-sm font-semibold text-ruby-accent tracking-wide whitespace-nowrap">[ ruby ]</span>
+        <span class="text-[10px] text-ruby-dim hidden sm:inline" id="status-dot">&#9679; ready</span>
+      </div>
+      <button onclick="toggleSettings()" class="text-[11px] text-ruby-dim hover:text-ruby-accent transition px-2 py-1 rounded-md hover:bg-ruby-panel">settings</button>
+    </header>
+
+    <div id="messages" class="flex-1 overflow-y-auto px-3 md:px-4 py-3 space-y-3 min-h-0" style="-webkit-overflow-scrolling:touch"></div>
+
+    <div id="empty-state" class="flex-1 flex items-center justify-center px-6 min-h-0">
+      <div class="text-center max-w-xs">
+        <div class="text-xl md:text-2xl font-bold text-ruby-accent mb-2">[ ruby ]</div>
+        <p class="text-xs md:text-sm text-ruby-dim leading-relaxed">AI assistant. Ask me anything — search the web, write code, research topics, or just chat.</p>
+        <div class="mt-5 text-[10px] text-ruby-dim/40"><p>DeepSeek V4 Flash via OpenRouter</p></div>
+      </div>
+    </div>
+
+    <div id="input-area" class="shrink-0 px-2 md:px-4 pb-2 pt-2 bg-ruby-bg border-t border-ruby-border" style="padding-bottom:calc(env(safe-area-inset-bottom, 4px) + 8px)">
+      <div class="max-w-3xl mx-auto flex items-end gap-2 bg-ruby-panel rounded-xl border border-ruby-border px-3 md:px-4 py-2.5">
+        <textarea id="input" rows="1" placeholder="Message Ruby..." class="flex-1 bg-transparent text-sm text-ruby-accent placeholder-ruby-dim resize-none leading-6 max-h-28 min-h-[28px]" oninput="autoResize(this)"></textarea>
+        <button id="send-btn" onclick="sendMessage()" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-ruby-accent text-ruby-bg hover:opacity-90 active:scale-95 transition disabled:opacity-30 disabled:active:scale-100" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60" onclick="if(event.target===this)closeSettings()">
+    <div class="bg-ruby-surface border border-ruby-border rounded-xl w-80 max-w-[85vw] p-6" onclick="event.stopPropagation()">
+      <h2 class="text-sm font-semibold text-ruby-accent mb-4 tracking-wide">[ settings ]</h2>
+      <div class="space-y-3 text-xs">
+        <div class="flex justify-between"><span class="text-ruby-dim">model</span><span class="text-ruby-sec" id="s-model">--</span></div>
+        <div class="flex justify-between"><span class="text-ruby-dim">status</span><span class="text-ruby-green" id="s-status">--</span></div>
+        <div class="flex justify-between"><span class="text-ruby-dim">conversations</span><span class="text-ruby-sec" id="s-convs">0</span></div>
+        <hr class="border-ruby-border">
+        <div><label class="text-ruby-dim block mb-1.5">OpenRouter API Key</label>
+        <input id="api-key-input" type="password" placeholder="sk-or-v1-..." class="w-full bg-ruby-bg text-ruby-accent text-xs px-3 py-2.5 rounded-lg border border-ruby-border focus:border-ruby-sec transition placeholder-ruby-dim/50"></div>
+        <button onclick="saveApiKey()" class="w-full text-xs py-2.5 bg-ruby-accent text-ruby-bg rounded-lg font-medium hover:opacity-90 active:scale-[0.98] transition">Save</button>
+      </div>
+      <button onclick="closeSettings()" class="mt-3 text-xs text-ruby-dim hover:text-ruby-accent transition w-full text-center py-1">close</button>
+    </div>
+  </div>
+
+  <script>
+    // ─── Keyboard handling ─────────────────────────────────
+    if (window.visualViewport) {
+      visualViewport.addEventListener('resize', () => {
+        const diff = window.innerHeight - visualViewport.height;
+        document.getElementById('input-area').style.paddingBottom = diff > 100 ? (diff + 8) + 'px' : 'calc(env(safe-area-inset-bottom, 4px) + 8px)';
+      });
+    }
+
+    // ─── State ──────────────────────────────────────────────
+    const STATE = {
+      conversations: JSON.parse(localStorage.getItem('ruby_convs') || '[]'),
+      currentId: localStorage.getItem('ruby_current_id') || null,
+      history: [], sending: false,
+      apiKey: localStorage.getItem('ruby_api_key') || '',
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!STATE.currentId || !STATE.conversations.find(c => c.id === STATE.currentId)) newConversation();
+      else loadConversation(STATE.currentId);
+      renderConvList(); checkHealth(); bindInput();
+      document.getElementById('messages').addEventListener('touchstart', () => {});
+    });
+
+    // ─── Health ─────────────────────────────────────────────
+    async function checkHealth() {
+      try {
+        const r = await fetch('/api/health'); const d = await r.json();
+        document.getElementById('s-model').textContent = d.model || '--';
+        document.getElementById('s-status').textContent = d.api_key_configured ? 'connected' : 'no API key';
+        document.getElementById('s-status').style.color = d.api_key_configured ? '#00d466' : '#ff3b30';
+        const dot = document.getElementById('status-dot');
+        if (dot) dot.innerHTML = d.api_key_configured ? '&#9679; connected' : '&#9679; no key';
+      } catch {}
+    }
+
+    // ─── Conversations ──────────────────────────────────────
+    function newConversation() {
+      const id = Date.now().toString();
+      STATE.conversations.unshift({ id, title: 'New chat', created: new Date().toISOString().slice(0,10), history: [] });
+      STATE.currentId = id; STATE.history = []; persistConvs(); switchToConv(id);
+    }
+    function switchToConv(id) {
+      STATE.currentId = id; localStorage.setItem('ruby_current_id', id);
+      const conv = STATE.conversations.find(c => c.id === id);
+      if (conv) STATE.history = conv.history || [];
+      renderMessages(); renderConvList();
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('messages').classList.remove('hidden');
+      if (window.innerWidth < 768) toggleSidebar(true);
+    }
+    function deleteConversation(id, e) {
+      e.stopPropagation();
+      STATE.conversations = STATE.conversations.filter(c => c.id !== id);
+      if (STATE.currentId === id) { if (STATE.conversations.length) switchToConv(STATE.conversations[0].id); else newConversation(); }
+      persistConvs(); renderConvList();
+    }
+    function loadConversation(id) { switchToConv(id); }
+    function persistConvs() { localStorage.setItem('ruby_convs', JSON.stringify(STATE.conversations)); }
+
+    function renderConvList() {
+      document.getElementById('conv-list').innerHTML = STATE.conversations.map(c => {
+        const active = c.id === STATE.currentId;
+        const title = c.title.length > 28 ? c.title.slice(0,28)+'...' : c.title;
+        return '<div onclick="switchToConv(\''+c.id+'\')" class="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition '+(active?'bg-ruby-panel text-ruby-accent':'text-ruby-dim hover:text-ruby-accent hover:bg-ruby-panel/50')+'"><span class="text-xs shrink-0 w-4 text-center">'+(active?'&#9679;':'&#9675;')+'</span><span class="text-xs truncate flex-1">'+title+'</span><button onclick="deleteConversation(\''+c.id+'\',event)" class="text-ruby-dim/40 hover:text-ruby-red text-base leading-none p-1 -mr-1">&times;</button></div>';
+      }).join('');
+    }
+
+    function toggleSidebar(hide) {
+      const s = document.getElementById('sidebar');
+      const o = document.getElementById('sidebar-overlay');
+      if (hide === true) { s.classList.remove('open'); o.classList.add('hidden'); return; }
+      s.classList.toggle('open'); o.classList.toggle('hidden');
+    }
+
+    // ─── Messages ───────────────────────────────────────────
+    function renderMessages() {
+      document.getElementById('messages').innerHTML = STATE.history.map(msg => {
+        if (msg.role === 'system') return '<div class="msg-system">'+escapeHtml(msg.content)+'</div>';
+        const isUser = msg.role === 'user';
+        return '<div class="slide-up '+(isUser?'msg-user ml-6 md:ml-16':'msg-ruby mr-6 md:mr-16')+' px-3 md:px-4 py-2.5"><div class="text-[10px] font-semibold '+(isUser?'text-ruby-sec':'text-ruby-accent')+' mb-1.5 tracking-wide">'+(isUser?'[AMAR]':'[RUBY]')+'</div><div class="msg-content text-sm leading-relaxed text-ruby-accent/90">'+renderContent(msg.content)+'</div></div>';
+      }).join('');
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      const el = document.getElementById('messages');
+      requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+    }
+
+    function renderContent(text) {
+      if (!text) return '';
+      let html = escapeHtml(text);
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_,lang,code) => '<pre>'+(lang?'[code: '+escapeHtml(lang)+']':'[code]')+'\n'+escapeHtml(code.trim())+'</pre>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\n/g, '<br>');
+      return html;
+    }
+    function escapeHtml(text) { const d=document.createElement('div'); d.textContent=text; return d.innerHTML; }
+
+    // ─── Input ──────────────────────────────────────────────
+    function bindInput() {
+      const input = document.getElementById('input');
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+      });
+      input.addEventListener('input', () => {
+        document.getElementById('send-btn').disabled = !input.value.trim() || STATE.sending;
+      });
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('input');
+      const text = input.value.trim();
+      if (!text || STATE.sending) return;
+      input.value = ''; autoResize(input);
+      document.getElementById('send-btn').disabled = true;
+      STATE.sending = true;
+
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('messages').classList.remove('hidden');
+
+      STATE.history.push({ role: 'user', content: text });
+      renderMessages(); updateConvTitle(text);
+
+      const el = document.getElementById('messages');
+      el.innerHTML += '<div id="typing" class="msg-ruby mr-6 md:mr-16 px-3 md:px-4 py-3 slide-up"><div class="text-[10px] font-semibold text-ruby-accent mb-2 tracking-wide">[RUBY]</div><div class="flex gap-1.5 items-center pl-0.5"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
+      scrollToBottom();
+
+      try {
+        const apiKey = STATE.apiKey || undefined;
+        const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json',...(apiKey?{'X-API-Key':apiKey}:{})}, body:JSON.stringify({message:text, history:STATE.history.slice(0,-1)}) });
+        const data = await res.json();
+        document.getElementById('typing')?.remove();
+        STATE.history.push({ role:'assistant', content: data.error ? '[error] '+data.error : data.response });
+        renderMessages(); persistConvHistory();
+      } catch(err) {
+        document.getElementById('typing')?.remove();
+        STATE.history.push({ role:'assistant', content: '[error] Connection failed. Is the server running?' });
+        renderMessages();
+      }
+
+      STATE.sending = false;
+      document.getElementById('send-btn').disabled = false;
+      input.focus();
+    }
+
+    function updateConvTitle(text) {
+      const conv = STATE.conversations.find(c => c.id === STATE.currentId);
+      if (conv && conv.title === 'New chat') { conv.title = text.length>50 ? text.slice(0,50)+'...' : text; persistConvs(); renderConvList(); }
+    }
+    function persistConvHistory() {
+      const conv = STATE.conversations.find(c => c.id === STATE.currentId);
+      if (conv) { conv.history = STATE.history; persistConvs(); }
+    }
+
+    // ─── Settings ───────────────────────────────────────────
+    function toggleSettings() {
+      const m = document.getElementById('settings-modal');
+      m.classList.toggle('hidden'); m.classList.toggle('flex');
+      document.getElementById('s-convs').textContent = STATE.conversations.length;
+    }
+    function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); document.getElementById('settings-modal').classList.remove('flex'); }
+    function saveApiKey() {
+      const val = document.getElementById('api-key-input').value.trim();
+      if (val) { STATE.apiKey = val; localStorage.setItem('ruby_api_key', val); }
+      closeSettings();
+    }
+    function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 112) + 'px'; }
+  </script>
+</body>
+</html>
