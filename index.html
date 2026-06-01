@@ -52,69 +52,78 @@
       .chat-scroll { max-width: 56rem; }
       .msg-user, .msg-ruby { max-width: 80%; }
     }
-    @media (max-width: 400px) {
-      .msg-user, .msg-ruby { margin-left: 4px !important; margin-right: 4px !important; }
-      #messages { padding-left: 10px !important; padding-right: 10px !important; }
+    @media (min-width: 1280px) {
+      .chat-scroll { max-width: 64rem; }
+      .msg-user, .msg-ruby { max-width: 75%; }
+    }
+    @media (max-width: 480px) {
+      #messages { padding-left: 8px !important; padding-right: 8px !important; }
+      .msg-user, .msg-ruby { margin-left: 2px !important; margin-right: 2px !important; }
+      .msg-content { font-size: 13px !important; }
+      .msg-content pre { font-size: 11px !important; padding: 8px !important; }
     }
   </style>
 </head>
 <body class="flex flex-col bg-ruby-bg" style="height:100dvh">
   <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-30 w-72 bg-ruby-surface border-r border-ruby-border transform -translate-x-full md:translate-x-0 flex flex-col" style="padding-bottom:env(safe-area-inset-bottom)">
-    <div class="flex items-center justify-between p-4 border-b border-ruby-border shrink-0">
-      <h1 class="text-sm font-semibold text-ruby-accent tracking-wide">[ ruby ]</h1>
-      <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-xl leading-none p-1">&times;</button>
+  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-30 w-72 md:w-[260px] bg-ruby-surface border-r border-ruby-border transform -translate-x-full md:translate-x-0 flex flex-col" style="padding-bottom:env(safe-area-inset-bottom)">
+    <div class="flex items-center justify-between px-3 md:px-4 py-3 md:py-4 border-b border-ruby-border shrink-0">
+      <h1 class="text-xs md:text-sm font-semibold text-ruby-accent tracking-wide">[ ruby ]</h1>
+      <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-lg leading-none p-1">&times;</button>
     </div>
-    <div class="flex-1 overflow-y-auto p-3 space-y-1" id="conv-list"></div>
-    <div class="p-3 border-t border-ruby-border shrink-0">
-      <button onclick="newConversation()" class="w-full text-xs text-ruby-dim py-2.5 px-3 border border-ruby-border rounded-lg hover:text-ruby-accent hover:border-ruby-sec transition text-left font-medium">+ New chat</button>
+    <div class="flex-1 overflow-y-auto p-2 md:p-3 space-y-0.5 md:space-y-1" id="conv-list"></div>
+    <div class="p-2 md:p-3 border-t border-ruby-border shrink-0">
+      <button onclick="newConversation()" class="w-full text-[11px] md:text-xs text-ruby-dim py-2 md:py-2.5 px-2.5 md:px-3 border border-ruby-border rounded-lg hover:text-ruby-accent hover:border-ruby-sec transition text-left font-medium">+ New chat</button>
     </div>
   </aside>
 
   <div class="flex-1 flex flex-col min-h-0 md:ml-[260px]">
-    <header class="flex items-center justify-between px-3 md:px-4 py-3 border-b border-ruby-border bg-ruby-surface shrink-0">
-      <div class="flex items-center gap-2 min-w-0">
-        <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-xl leading-none p-1 -ml-1">&#9776;</button>
-        <span class="text-sm font-semibold text-ruby-accent tracking-wide whitespace-nowrap">[ ruby ]</span>
-        <span class="text-[10px] text-ruby-dim hidden sm:inline" id="status-dot">&#9679; ready</span>
+    <header class="flex items-center justify-between px-2 md:px-4 py-2.5 md:py-3 border-b border-ruby-border bg-ruby-surface shrink-0">
+      <div class="flex items-center gap-1.5 md:gap-2 min-w-0">
+        <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-lg leading-none p-1 -ml-1">&#9776;</button>
+        <span class="text-xs md:text-sm font-semibold text-ruby-accent tracking-wide whitespace-nowrap">[ ruby ]</span>
+        <span class="text-[9px] md:text-[10px] text-ruby-dim hidden sm:inline" id="status-dot">&#9679; ready</span>
       </div>
-      <button onclick="toggleSettings()" class="text-[11px] text-ruby-dim hover:text-ruby-accent transition px-2 py-1 rounded-md hover:bg-ruby-panel">settings</button>
+      <button onclick="toggleSettings()" class="text-[10px] md:text-[11px] text-ruby-dim hover:text-ruby-accent transition px-1.5 md:px-2 py-1 rounded-md hover:bg-ruby-panel">settings</button>
     </header>
 
-    <div id="messages" class="flex-1 overflow-y-auto px-3 md:px-6 py-3 space-y-3 min-h-0" style="-webkit-overflow-scrolling:touch"></div>
+    <div id="messages" class="flex-1 overflow-y-auto px-2 md:px-6 py-2 md:py-3 space-y-2 md:space-y-3 min-h-0" style="-webkit-overflow-scrolling:touch"></div>
 
-    <div id="empty-state" class="flex-1 flex items-center justify-center px-6 min-h-0">
-      <div class="text-center">
-        <div class="text-xl md:text-3xl font-bold text-ruby-accent mb-3">[ ruby ]</div>
-        <p class="text-xs md:text-sm text-ruby-dim leading-relaxed max-w-sm mx-auto">AI assistant. Ask me anything — search the web, write code, research topics, or just chat.</p>
-        <div class="mt-5 text-[10px] text-ruby-dim/40"><p>DeepSeek V4 Flash via OpenRouter</p></div>
+    <div id="empty-state" class="flex-1 flex items-center justify-center px-4 md:px-6 min-h-0">
+      <div class="text-center px-2">
+        <div class="text-lg md:text-2xl lg:text-3xl font-bold text-ruby-accent mb-2 md:mb-3">[ ruby ]</div>
+        <p class="text-[11px] md:text-sm text-ruby-dim leading-relaxed max-w-xs md:max-w-sm mx-auto">AI assistant. Ask me anything — search the web, write code, research topics, or just chat.</p>
+        <div class="mt-4 md:mt-5 text-[9px] md:text-[10px] text-ruby-dim/40"><p>DeepSeek V4 Flash via OpenRouter</p></div>
       </div>
     </div>
 
-    <div id="input-area" class="shrink-0 px-2 md:px-6 pb-2 pt-2 bg-ruby-bg border-t border-ruby-border" style="padding-bottom:calc(env(safe-area-inset-bottom, 4px) + 8px)">
-      <div class="w-full max-w-2xl lg:max-w-3xl mx-auto flex items-end gap-2 bg-ruby-panel rounded-xl border border-ruby-border px-3 md:px-4 py-2.5">
-        <textarea id="input" rows="1" placeholder="Message Ruby..." class="flex-1 bg-transparent text-sm text-ruby-accent placeholder-ruby-dim resize-none leading-6 max-h-28 min-h-[28px]" oninput="autoResize(this)"></textarea>
-        <button id="send-btn" onclick="sendMessage()" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-ruby-accent text-ruby-bg hover:opacity-90 active:scale-95 transition disabled:opacity-30 disabled:active:scale-100" disabled>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    <div id="input-area" class="shrink-0 px-1.5 md:px-6 pb-1.5 md:pb-2 pt-1.5 md:pt-2 bg-ruby-bg border-t border-ruby-border" style="padding-bottom:calc(env(safe-area-inset-bottom, 4px) + 6px)">
+      <div class="w-full max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto flex items-end gap-1.5 md:gap-2 bg-ruby-panel rounded-xl border border-ruby-border px-2.5 md:px-4 py-2 md:py-2.5">
+        <textarea id="input" rows="1" placeholder="Message Ruby..." class="flex-1 bg-transparent text-xs md:text-sm text-ruby-accent placeholder-ruby-dim resize-none leading-5 md:leading-6 max-h-24 md:max-h-28 min-h-[24px] md:min-h-[28px]" oninput="autoResize(this)"></textarea>
+        <button id="send-btn" onclick="sendMessage()" class="shrink-0 w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg bg-ruby-accent text-ruby-bg hover:opacity-90 active:scale-95 transition disabled:opacity-30 disabled:active:scale-100" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="md:w-4 md:h-4"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
     </div>
   </div>
 
-  <div id="settings-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60" onclick="if(event.target===this)closeSettings()">
-    <div class="bg-ruby-surface border border-ruby-border rounded-xl w-80 max-w-[85vw] p-6" onclick="event.stopPropagation()">
-      <h2 class="text-sm font-semibold text-ruby-accent mb-4 tracking-wide">[ settings ]</h2>
-      <div class="space-y-3 text-xs">
+  <div id="settings-modal" class="fixed inset-0 z-40 hidden items-end md:items-center justify-center bg-black/60" onclick="if(event.target===this)closeSettings()">
+    <div class="bg-ruby-surface border border-ruby-border rounded-t-xl md:rounded-xl w-full md:w-80 max-w-[95vw] md:max-w-[85vw] p-4 md:p-6" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-4 md:mb-4">
+        <h2 class="text-xs md:text-sm font-semibold text-ruby-accent tracking-wide">[ settings ]</h2>
+        <button onclick="closeSettings()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-lg leading-none p-1">&times;</button>
+      </div>
+      <div class="space-y-2.5 md:space-y-3 text-[11px] md:text-xs">
         <div class="flex justify-between"><span class="text-ruby-dim">model</span><span class="text-ruby-sec" id="s-model">--</span></div>
         <div class="flex justify-between"><span class="text-ruby-dim">status</span><span class="text-ruby-green" id="s-status">--</span></div>
         <div class="flex justify-between"><span class="text-ruby-dim">conversations</span><span class="text-ruby-sec" id="s-convs">0</span></div>
         <hr class="border-ruby-border">
-        <div><label class="text-ruby-dim block mb-1.5">OpenRouter API Key</label>
+        <div><label class="text-ruby-dim block mb-1">OpenRouter API Key</label>
         <input id="api-key-input" type="password" placeholder="sk-or-v1-..." class="w-full bg-ruby-bg text-ruby-accent text-xs px-3 py-2.5 rounded-lg border border-ruby-border focus:border-ruby-sec transition placeholder-ruby-dim/50"></div>
         <button onclick="saveApiKey()" class="w-full text-xs py-2.5 bg-ruby-accent text-ruby-bg rounded-lg font-medium hover:opacity-90 active:scale-[0.98] transition">Save</button>
       </div>
-      <button onclick="closeSettings()" class="mt-3 text-xs text-ruby-dim hover:text-ruby-accent transition w-full text-center py-1">close</button>
+      <button onclick="closeSettings()" class="hidden md:block mt-3 text-xs text-ruby-dim hover:text-ruby-accent transition w-full text-center py-1">close</button>
     </div>
   </div>
 
@@ -181,8 +190,9 @@
     function renderConvList() {
       document.getElementById('conv-list').innerHTML = STATE.conversations.map(c => {
         const active = c.id === STATE.currentId;
-        const title = c.title.length > 28 ? c.title.slice(0,28)+'...' : c.title;
-        return '<div onclick="switchToConv(\''+c.id+'\')" class="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition '+(active?'bg-ruby-panel text-ruby-accent':'text-ruby-dim hover:text-ruby-accent hover:bg-ruby-panel/50')+'"><span class="text-xs shrink-0 w-4 text-center">'+(active?'&#9679;':'&#9675;')+'</span><span class="text-xs truncate flex-1">'+title+'</span><button onclick="deleteConversation(\''+c.id+'\',event)" class="text-ruby-dim/40 hover:text-ruby-red text-base leading-none p-1 -mr-1">&times;</button></div>';
+        const maxLen = window.innerWidth < 768 ? 22 : 28;
+        const title = c.title.length > maxLen ? c.title.slice(0,maxLen)+'...' : c.title;
+        return '<div onclick="switchToConv(\''+c.id+'\')" class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-2 md:py-2.5 rounded-lg cursor-pointer transition '+(active?'bg-ruby-panel text-ruby-accent':'text-ruby-dim hover:text-ruby-accent hover:bg-ruby-panel/50')+'"><span class="text-[10px] md:text-xs shrink-0 w-3 md:w-4 text-center">'+(active?'&#9679;':'&#9675;')+'</span><span class="text-[11px] md:text-xs truncate flex-1">'+title+'</span><button onclick="deleteConversation(\''+c.id+'\',event)" class="text-ruby-dim/40 hover:text-ruby-red text-sm md:text-base leading-none p-0.5 md:p-1 -mr-1">&times;</button></div>';
       }).join('');
     }
 
@@ -199,7 +209,7 @@
         if (msg.role === 'system') return '<div class="msg-system">'+escapeHtml(msg.content)+'</div>';
         const isUser = msg.role === 'user';
         const sides = isUser ? 'ml-6 md:ml-0' : 'mr-6 md:mr-0';
-        return '<div class="chat-scroll slide-up '+(isUser?'msg-user ':'msg-ruby ')+sides+' px-3 md:px-4 py-2.5"><div class="text-[10px] font-semibold '+(isUser?'text-ruby-sec':'text-ruby-accent')+' mb-1.5 tracking-wide">'+(isUser?'[AMAR]':'[RUBY]')+'</div><div class="msg-content text-sm leading-relaxed text-ruby-accent/90">'+renderContent(msg.content)+'</div></div>';
+        return '<div class="chat-scroll slide-up '+(isUser?'msg-user ':'msg-ruby ')+sides+' px-2.5 md:px-4 py-2 md:py-2.5"><div class="text-[9px] md:text-[10px] font-semibold '+(isUser?'text-ruby-sec':'text-ruby-accent')+' mb-1 md:mb-1.5 tracking-wide">'+(isUser?'[AMAR]':'[RUBY]')+'</div><div class="msg-content text-xs md:text-sm leading-relaxed text-ruby-accent/90">'+renderContent(msg.content)+'</div></div>';
       }).join('');
       scrollToBottom();
     }
@@ -246,7 +256,7 @@
       renderMessages(); updateConvTitle(text);
 
       const el = document.getElementById('messages');
-      el.innerHTML += '<div id="typing" class="chat-scroll msg-ruby mr-6 md:mr-0 px-3 md:px-4 py-3 slide-up"><div class="text-[10px] font-semibold text-ruby-accent mb-2 tracking-wide">[RUBY]</div><div class="flex gap-1.5 items-center pl-0.5"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
+      el.innerHTML += '<div id="typing" class="chat-scroll msg-ruby mr-6 md:mr-0 px-2.5 md:px-4 py-2 md:py-3 slide-up"><div class="text-[9px] md:text-[10px] font-semibold text-ruby-accent mb-1 md:mb-2 tracking-wide">[RUBY]</div><div class="flex gap-1.5 items-center pl-0.5"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>';
       scrollToBottom();
 
       try {
@@ -288,7 +298,7 @@
       if (val) { STATE.apiKey = val; localStorage.setItem('ruby_api_key', val); }
       closeSettings();
     }
-    function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 112) + 'px'; }
+    function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, window.innerWidth < 768 ? 96 : 112) + 'px'; }
   </script>
 </body>
 </html>
