@@ -42,7 +42,6 @@
     .slide-up { animation: slideUp 0.2s ease; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @media (min-width: 768px) {
-      #sidebar { transform: translateX(0) !important; position: relative !important; width: 260px !important; }
       #sidebar-overlay { display: none !important; }
       .chat-scroll { width: 100%; max-width: 48rem; margin-left: auto; margin-right: auto; }
       .msg-user, .msg-ruby { max-width: 85%; }
@@ -64,10 +63,10 @@
     }
   </style>
 </head>
-<body class="flex flex-col bg-ruby-bg" style="height:100dvh">
+<body class="flex flex-col md:flex-row bg-ruby-bg" style="height:100dvh">
   <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-  <aside id="sidebar" class="fixed left-0 top-0 bottom-0 z-30 w-72 md:w-[260px] bg-ruby-surface border-r border-ruby-border transform -translate-x-full md:translate-x-0 flex flex-col" style="padding-bottom:env(safe-area-inset-bottom)">
+  <aside id="sidebar" class="fixed md:relative left-0 top-0 bottom-0 z-30 w-72 md:w-[260px] md:shrink-0 bg-ruby-surface border-r border-ruby-border transform -translate-x-full md:translate-x-0 flex flex-col" style="padding-bottom:env(safe-area-inset-bottom)">
     <div class="flex items-center justify-between px-3 md:px-4 py-3 md:py-4 border-b border-ruby-border shrink-0">
       <h1 class="text-xs md:text-sm font-semibold text-ruby-accent tracking-wide">[ ruby ]</h1>
       <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-lg leading-none p-1">&times;</button>
@@ -78,7 +77,7 @@
     </div>
   </aside>
 
-  <div class="flex-1 flex flex-col min-h-0 md:ml-[260px]">
+  <div class="flex-1 flex flex-col min-h-0">
     <header class="flex items-center justify-between px-2 md:px-4 py-2.5 md:py-3 border-b border-ruby-border bg-ruby-surface shrink-0">
       <div class="flex items-center gap-1.5 md:gap-2 min-w-0">
         <button onclick="toggleSidebar()" class="text-ruby-dim hover:text-ruby-accent md:hidden text-lg leading-none p-1 -ml-1">&#9776;</button>
@@ -87,7 +86,7 @@
       </div>
     </header>
 
-    <div id="messages" class="flex-1 overflow-y-auto px-2 md:px-6 py-2 md:py-3 space-y-2 md:space-y-3 min-h-0" style="-webkit-overflow-scrolling:touch"></div>
+    <div id="messages" class="flex-1 overflow-y-auto px-2 md:px-6 py-2 md:py-3 space-y-2 md:space-y-3 min-h-0 hidden" style="-webkit-overflow-scrolling:touch"></div>
 
     <div id="empty-state" class="flex-1 flex items-center justify-center px-4 md:px-6 min-h-0">
       <div class="text-center px-2">
